@@ -76,6 +76,83 @@ asmMult:
     
     /*** STUDENTS: Place your code BELOW this line!!! **************/
     
+    /* REGISTER TRACKER FOR PROGRAMMER
+     * R0 - recive multiplicand & output end value
+     * R1 - recive multilier
+     * R2 - 
+     * R3 - 
+     * R4 - 
+     * R5 - 
+     * R6 - absolute value A
+     * R7 - absolute value B
+     * R8 - WIP product
+     * R9 - prod_Is_Neg & 
+     * R10 - stores 0
+     * R11 - stores 1
+     * R12 - location for rng_Error & 
+     */
+    
+    /* store 0 in R10 and 1 in R11 */
+    LDR R10,=0
+    LDR R11,=1
+    
+    /* comment */
+    LDR R2,=a_Multiplicand
+    LDR R3,=b_Multiplicand
+    
+    /* commonet */
+    STR R0,[R2]
+    STR R1,[R3]
+    
+    /* set all our other values to 0 */
+    LDR R2,=a_Sign
+    LDR R3,=b_Sign
+    LDR R4,=a_Abs
+    LDR R5,=b_Abs
+    
+    STR R10,[R2]
+    STR R10,[R3]
+    STR R10,[R4]
+    STR R10,[R5]
+    
+    LDR R9,=prod_Is_Neg
+    LDR R12,=rng_Error
+    
+    STR R10,[R9]
+    STR R10,[R12]
+    
+    /* check if R0 and/or R1 is an invalid signed 16 bit number */
+    /* TODO
+     * if so set rng_Error to to 1 and R0 to 0
+     * and exit code 
+     */
+    
+    /* set a_Sign to sign bit for a */
+    
+    /* set b_Sign to sign bit for b */
+    
+    /* if one but not both of the sign bit are 1 
+     * set prod_Is_Neg to 1 */
+    
+    /* if a_Sign is 1, find absolute value of A */
+    
+    /* if b_sign is 1, find absolute value of B */
+    
+    /* use shift-and-add to multiply them together.
+     * (use flow chart for class)
+     */
+    
+    /* store initial result (which will always be positive)
+     * in init_Product
+     */
+    
+    /* if prod_Is_Neg, 2s-complement it */
+    
+    /* store final result to final_Product */
+    
+    /* copy result to R0 */
+    
+    
     
     /*** STUDENTS: Place your code ABOVE this line!!! **************/
 
