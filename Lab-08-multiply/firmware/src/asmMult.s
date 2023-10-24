@@ -76,22 +76,6 @@ asmMult:
     
     /*** STUDENTS: Place your code BELOW this line!!! **************/
     
-    /* REGISTER TRACKER FOR PROGRAMMER
-     * R0 - recive multiplicand & output end value
-     * R1 - recive multilier
-     * R2 - a_Sign loc,
-     * R3 - b_Sign loc,
-     * R4 - a_Abs loc, 0x00007FFF, Abs 
-     * R5 - b_Abs loc,
-     * R6 - 0xFFFFFFFF,
-     * R7 - working w/ diff versions of A
-     * R8 - working w/ diff versions of B
-     * R9 - prod_Is_Neg & 
-     * R10 - stores 0
-     * R11 - stores 1
-     * R12 - rng_Error loc & Abs working number
-     */
-    
     /* Load 0 in R10 and 1 in R11 */
     LDR R10,=0
     LDR R11,=1
@@ -128,23 +112,20 @@ asmMult:
     STR R10,[R9]
     STR R10,[R12]
     
-    /* check if R0 and/or R1 is an invalid signed 16 bit number */
-    /* TODO
+    /* check if R0 and/or R1 is an invalid signed 16 bit number
      * if so set rng_Error to to 1 and R0 to 0
      * and exit code 
      */
     /* load all 1s into R6 for compairson purposes */
     LDR R6,=0xFFFFFFFF
-    /* ORN the input multiplicand w/ all 0s 
-     * to... */
+    /* ORN the input multiplicand w/ all 0s */
     ORN R7,R0,R10
-    /* ORN the input muliplier w/ all 0s 
-     * to... */
+    /* ORN the input muliplier w/ all 0s  */
     ORN R8,R1,R10
-    /* */
+    /* check for an error and branch if we don't */
     CMP R7,R6
     BEQ no_error
-    /* */
+    /* check for an error and branch if we don't */
     CMP R8,R6
     BEQ no_error
     
@@ -153,20 +134,20 @@ asmMult:
      * R0 to 0
      * and exit the code */
     STR R11,[R12]
-    LDR R0,R10
+    MOV R0,R10
     B done
     
 no_error:
-    /* ahhh */
-    LDR R4,=0x00007FFF
+    /* load up our non-sign-bit values w/ 1 */
+    LDR R12,=0x00007FFF
     
     /* set a_Sign to sign bit for a */
-    AND R7,R0,R4
+    AND R7,R0,R12
     CMP R6,R7
     STREQ R11,[R2]
     
     /* set b_Sign to sign bit for b */
-    AND R8,R1,R4
+    AND R8,R1,R12
     CMP R6,R8
     STREQ R11,[R3]
     
@@ -175,43 +156,83 @@ no_error:
     LDR R7,[R2]
     LDR R8,[R3]
     CMP R7,R8
-    STRNE R11,[R12]
+    STRNE R11,[R9]
+    /* skip down to check if we need to find a_Abs */
     B check_for_abs_a
     
 find_abs_a:
     ORN R4,R10,R7
     SUB R7,R4,1
+    /* once we find a_Abs go down to check for b */
     B check_for_abs_b
     
 find_abs_b:
     ORN R4,R10,R8
     SUB R8,R4,1
-    B multiply
+    /* once we find b_Abs go down to get ready to multiply */
+    B get_ready_to_multiply
     
 check_for_abs_a:
     CMP R7,R11
-    BEQ find_a_abs
+    /* if we need to find a_Abs go up there */
+    BEQ find_abs_a
     
 check_for_abs_b:
     CMP R8,R11
+    /* if we need to find b_Abs go up there */
     BEQ find_abs_b
     
+get_ready_to_multiply:
+    /* copy the ABS of R7 and R8 into their locations */
+    STR R7,[R4]
+    STR R8,[R5]
+    MOV R12,R10
+    
 multiply:
-    
     /* use shift-and-add to multiply them together.
-     * (use flow chart for class)
+     * multiplicand is R7
+     * multiplier is R8
+     * product is R12
      */
+    /* check if mutliplyer = 0 and if so return product */
+    CMP R8,R10
+    BEQ return_product
     
+    /* check if multiplier LSB = 1 */
+    AND R6,R8,R11
+    CMP R6,R11
+    /* and if yes then product = product + mutiplicand */
+    ADDEQ R12,R12,R7
+    
+    /* multipler shift right by 1 */
+    LSR R8,1
+    /* multiplicand shift left by 1 */
+    LSL R7,1
+    /* back to the top */
+    B multiply
+
+return_product:
     /* store initial result (which will always be positive)
      * in init_Product
      */
+    LDR R2,=init_Product
+    STR R12,[R2]
     
     /* if prod_Is_Neg, 2s-complement it */
+    LDR R6,[R9]
+    CMP R6,R11
+    BNE final
     
+    MVN R4,R12
+    ADD R12,R4,R11
+    
+final:
     /* store final result to final_Product */
+    LDR R3,=final_Product
+    STR R12,[R3]
     
     /* copy result to R0 */
-    
+    MOV R0,R12
     
     /*** STUDENTS: Place your code ABOVE this line!!! **************/
 
