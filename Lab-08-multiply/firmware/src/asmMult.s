@@ -93,7 +93,36 @@ asmMult:
      * R12 - 
      */
     
+    /* init all variables to 0 */
     
+    /* copy r0 into memory location a_Multiplicand */
+    
+    /* copy r1 into b_Multiplier */
+    
+    /* store the sign bits into their respective *_Sign mem location.
+     * make sure it's 0 for positive and 1 for negative */
+    
+    /* based on the sign bits, decide if fianl output will be + or -
+     * if negative, set prod_Is_Neg to 1, otherwise make it 0
+     */
+    
+    /* find (if you need to) and store absoule values */
+    
+    /* use shift and add */
+    
+    /* store inital result in init_Product. */
+    
+    /* if prod_Is_Neg = 1, negative it */
+    
+    /* store final product */
+    
+    /* copy final restu to r0 */
+    
+    B done
+    
+error:
+    /* set memory location rng_Error to 1 */
+    /* set r0 to 0 */
     
     /*** STUDENTS: Place your code ABOVE this line!!! **************/
 
