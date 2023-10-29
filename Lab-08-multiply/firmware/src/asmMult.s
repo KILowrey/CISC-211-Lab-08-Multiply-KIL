@@ -178,9 +178,9 @@ asmMult:
     CMP R2,R3
     STRNE R11,[R4]
     
-    CMP R2,R10
+    CMP R0,R10
     STREQ R10,[R4]
-    CMP R3,R10
+    CMP R1,R10
     STREQ R10,[R4]
     
     B check_a
