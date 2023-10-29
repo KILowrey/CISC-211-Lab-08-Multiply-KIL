@@ -99,30 +99,159 @@ asmMult:
     
     /* copy r1 into b_Multiplier */
     
+    LDR R2,=a_Multiplicand
+    STR R0,[R2]
+    LDR R3,=b_Multiplier
+    STR R1,[R3]
+    
+    LDR R10,=0
+    LDR R11,=1
+    
+    LDR R12,=rng_Error
+    STR R10,[R12]
+    
+    LDR R2,=a_Sign
+    LDR R3,=b_Sign
+    STR R10,[R2]
+    STR R10,[R3]
+    
+    LDR R4,=prod_Is_Neg
+    STR R10,[R4]
+    
+    LDR R5,=a_Abs
+    LDR R6,=b_Abs
+    STR R10,[R5]
+    STR R10,[R6]
+    
+    LDR R7,=init_Product
+    LDR R8,=final_Product
+    STR R10,[R7]
+    STR R10,[R8]
+    
+    LDR R2,=2
+    LDR R3,=0
+    LDR R4,=0
+    LDR R5,=0x00007FFF
+    LDR R6,=0xFFFFFFFF
+    
+    ORR R7,R0,R5
+    CMP R7,R5
+    ADDNE R3,R3,1
+    CMP R7,R6
+    ADDNE R3,R3,1
+    
+    ORR R8,R1,R5
+    CMP R8,R5
+    ADDNE R4,R4,1
+    CMP R8,R6
+    ADDNE R4,R4,1
+    
+    CMP R3,R2
+    BEQ error
+    CMP R4,R2
+    BEQ error
+    
     /* store the sign bits into their respective *_Sign mem location.
      * make sure it's 0 for positive and 1 for negative */
+    LDR R3,=a_Sign
+    LDR R4,=b_Sign
+    
+    CMP R7,R6
+    STREQ R11,[R3]
+    
+    CMP R8,R6
+    STREQ R11,[R4]
+    
     
     /* based on the sign bits, decide if fianl output will be + or -
      * if negative, set prod_Is_Neg to 1, otherwise make it 0
      */
+    LDR R2,[R3]
+    LDR R3,[R4]
+    
+    LDR R4,=prod_Is_Neg
+    
+    CMP R2,R3
+    STRNE R11,[R4]
+    
+    
+    
+    B check_a
     
     /* find (if you need to) and store absoule values */
     
+find_a:
+    SUB R7,R7,1
+    MVN R7,R7
+    B check_b
+    
+find_b:
+    SUB R8,R8,1
+    MVN R8,R8
+    B multiply
+    
+check_a:
+    MOV R7,R0
+    CMP R2,R11
+    BEQ find_a
+    
+check_b:
+    MOV R8,R1
+    CMP R3,R11
+    BEQ find_b
+    
+ready_to_multiply:
+    LDR R5,=a_Abs
+    LDR R6,=b_Abs
+    
+    STR R7,[R5]
+    STR R8,[R6]
+    
+    LDR R12,=0
+    
+multiply:
     /* use shift and add */
     
+    CMP R8,R10
+    BEQ return_product
+    
+    AND R6,R8,R11
+    CMP R6,R11
+    ADDEQ R12,R12,R7
+    
+    LSR R8,1
+    LSL R7,1
+    B multiply
+    
+return_product:
     /* store inital result in init_Product. */
+    LDR R2,=init_Product
+    STR R12,[R2]
     
     /* if prod_Is_Neg = 1, negative it */
+    LDR R3,=prod_Is_Neg
+    LDR R4,[R3]
+    CMP R4,R11
+    BNE final
     
+    MVN R5,R12
+    ADD R12,R4,R11
+    
+final:
     /* store final product */
+    LDR R3,=final_Product
+    STR R12,[R3]
     
     /* copy final restu to r0 */
+    MOV R0,R12
     
     B done
     
 error:
     /* set memory location rng_Error to 1 */
+    STR R11,[R12]
     /* set r0 to 0 */
+    LDR R0,=0
     
     /*** STUDENTS: Place your code ABOVE this line!!! **************/
 
