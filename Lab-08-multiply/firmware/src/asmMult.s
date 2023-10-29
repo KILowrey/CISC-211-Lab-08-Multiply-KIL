@@ -188,13 +188,17 @@ asmMult:
     /* find (if you need to) and store absoule values */
     
 find_a:
-    SUB R7,R7,1
-    MVN R7,R7
+    SUB R5,R7,R11
+    MVN R7,R5
+    /*SUB R7,R7,1*/
+    
     B check_b
     
 find_b:
-    SUB R8,R8,1
-    MVN R8,R8
+    SUB R6,R8,R11
+    MVN R8,R6
+    /*SUB R8,R8,1*/
+    
     B multiply
     
 check_a:
@@ -241,8 +245,9 @@ return_product:
     CMP R4,R11
     BNE final
     
-    MVN R5,R12
-    ADD R12,R4,R11
+    //MVN R5,R12
+    //ADD R12,R4,R11
+    NEG R12,R12
     
 final:
     /* store final product */
