@@ -139,12 +139,16 @@ asmMult:
     ADDNE R3,R3,1
     CMP R7,R6
     ADDNE R3,R3,1
+    /*CMP R7,R0
+    MOVEQ R3,R0*/
     
     ORR R8,R1,R5
     CMP R8,R5
     ADDNE R4,R4,1
     CMP R8,R6
     ADDNE R4,R4,1
+    /*CMP R8,R0
+    MOVEQ R4,R0*/
     
     CMP R3,R2
     BEQ error
@@ -174,7 +178,10 @@ asmMult:
     CMP R2,R3
     STRNE R11,[R4]
     
-    
+    CMP R2,R10
+    STREQ R10,[R4]
+    CMP R3,R10
+    STREQ R10,[R4]
     
     B check_a
     
