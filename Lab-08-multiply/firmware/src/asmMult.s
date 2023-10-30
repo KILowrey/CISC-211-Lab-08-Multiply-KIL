@@ -93,79 +93,89 @@ asmMult:
      * R12 - 
      */
     
-    /* init all variables to 0 */
-    
-    /* copy r0 into memory location a_Multiplicand */
-    
-    /* copy r1 into b_Multiplier */
-    
+    /* upload the inputs to where they need to be stored in memory */
     LDR R2,=a_Multiplicand
     STR R0,[R2]
     LDR R3,=b_Multiplier
     STR R1,[R3]
     
+    /* load 0 into R10 and 1 into R11 for easy use later */
     LDR R10,=0
     LDR R11,=1
     
+    /* set R12 to lead to rng_Error and load it with 0 for now */
     LDR R12,=rng_Error
     STR R10,[R12]
     
+    /* load and assign our sign variables to 0 to reset from last run */
     LDR R2,=a_Sign
     LDR R3,=b_Sign
     STR R10,[R2]
     STR R10,[R3]
     
+    /* reset prod_Is_Neg to 0 from whatever last run was */
     LDR R4,=prod_Is_Neg
     STR R10,[R4]
     
+    /* absolute values */
     LDR R5,=a_Abs
     LDR R6,=b_Abs
     STR R10,[R5]
     STR R10,[R6]
     
+    /* init_Product and final_Product */
     LDR R7,=init_Product
     LDR R8,=final_Product
     STR R10,[R7]
     STR R10,[R8]
     
-    LDR R2,=2
-    LDR R3,=0
-    LDR R4,=0
+    /* load 2 into R2 and set R3 and R4 to 0
+     * they will serve as our counters for finding out if
+     * our inputs are invalid
+     */
+    /*LDR R2,=2*/
+    LDR R3,=-32768
+    LDR R4,=32767
     LDR R5,=0x00007FFF
     LDR R6,=0xFFFFFFFF
     
-    ORR R7,R0,R5
-    CMP R7,R5
-    ADDNE R3,R3,1
-    CMP R7,R6
-    ADDNE R3,R3,1
-    /*CMP R7,R0
-    MOVEQ R3,R0*/
+    /* if the most significant 9 bits of R0 are not all 0's */
+    CMP R0,R3
+    /* we add one to our R3 counter */
+    BLT error
+    /* if they're not all 1's either */
+    CMP R0,R4
+    /* we add one to our counter */
+    BGT error
     
-    ORR R8,R1,R5
-    CMP R8,R5
-    ADDNE R4,R4,1
-    CMP R8,R6
-    ADDNE R4,R4,1
-    /*CMP R8,R0
-    MOVEQ R4,R0*/
-    
-    CMP R3,R2
-    BEQ error
-    CMP R4,R2
-    BEQ error
+    /* if the most significant 9 bits of r0 are not all 0's */
+    CMP R1,R3
+    /* we add one to our R4 counter */
+    BLT error
+    /* repeast for all 1's in our R4 counter */
+    CMP R1,R4
+    BGT error
     
     /* store the sign bits into their respective *_Sign mem location.
      * make sure it's 0 for positive and 1 for negative */
     LDR R3,=a_Sign
     LDR R4,=b_Sign
     
+    /*  
+    ORR R7,R0,R5
     CMP R7,R6
     STREQ R11,[R3]
-    
+    */
+    /*  
+    ORR R8,R1,R5
     CMP R8,R6
     STREQ R11,[R4]
+     */
     
+    LSR R7,R0,31
+    STR R7,[R3]
+    LSR R8,R1,31
+    STR R8,[R4]
     
     /* based on the sign bits, decide if fianl output will be + or -
      * if negative, set prod_Is_Neg to 1, otherwise make it 0
@@ -175,30 +185,29 @@ asmMult:
     
     LDR R4,=prod_Is_Neg
     
+    /* if our sign bits are not equal (meaning one 1 and one 0
+     * we set to negative */
     CMP R2,R3
     STRNE R11,[R4]
     
+    /* but if either of our input values are 0 
+     * we override that and set it back to 0 */
     CMP R0,R10
     STREQ R10,[R4]
     CMP R1,R10
     STREQ R10,[R4]
     
     B check_a
-    
     /* find (if you need to) and store absoule values */
     
 find_a:
-    SUB R5,R7,R11
+    SUB R5,R7,1
     MVN R7,R5
-    /*SUB R7,R7,1*/
-    
     B check_b
     
 find_b:
-    SUB R6,R8,R11
+    SUB R6,R8,1
     MVN R8,R6
-    /*SUB R8,R8,1*/
-    
     B multiply
     
 check_a:
@@ -223,7 +232,7 @@ ready_to_multiply:
 multiply:
     /* use shift and add */
     
-    CMP R8,R10
+    CMP R8,0
     BEQ return_product
     
     AND R6,R8,R11
@@ -245,8 +254,6 @@ return_product:
     CMP R4,R11
     BNE final
     
-    //MVN R5,R12
-    //ADD R12,R4,R11
     NEG R12,R12
     
 final:
